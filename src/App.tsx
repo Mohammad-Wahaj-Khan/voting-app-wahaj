@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { Vote, Trophy, Users, BarChart3 } from "lucide-react";
-import { connectWallet, getCandidates, vote, getWinner } from "./dist/blockchain.js";
+import { useEffect, useState } from "react";
+import { Vote, Trophy, Users } from "lucide-react";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { connectWallet, getCandidates, vote, getWinner, addUser, changeOwner } from "./dist/blockchain.js";
 
 function App() {
   const [candidates, setCandidates] = useState<
@@ -10,6 +11,8 @@ function App() {
   const [selectedCandidate, setSelectedCandidate] = useState<number | null>(null);
   const [totalVotes, setTotalVotes] = useState(0);
   const [winner, setWinner] = useState<{ name: string; votes: number } | null>(null);
+  const [newUser, setNewUser] = useState("");
+  const [owner, setOwner] = useState("");
 
   useEffect(() => {
     fetchCandidates();
@@ -34,6 +37,20 @@ function App() {
   async function fetchWinner() {
     const winnerData = await getWinner();
     if (winnerData) setWinner(winnerData);
+  }
+
+  async function handleAddUser() {
+    if (newUser) {
+      await addUser(newUser);
+      setNewUser("");
+    }
+  }
+
+  async function handleChangeOwner() {
+    if (owner) {
+      await changeOwner(owner);
+      setOwner("");
+    }
   }
 
   return (
@@ -109,20 +126,11 @@ function App() {
                 </div>
               </div>
               <div className="bg-white rounded-xl shadow-lg p-6">
-                <div className="flex items-center gap-2 mb-6">
-                  <BarChart3 className="h-6 w-6 text-blue-500" />
-                  <h2 className="text-xl font-semibold">Statistics</h2>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Total Votes Cast</span>
-                    <span className="font-medium">{totalVotes}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Number of Candidates</span>
-                    <span className="font-medium">{candidates.length}</span>
-                  </div>
-                </div>
+                <h2 className="text-xl font-semibold mb-4">Admin Controls</h2>
+                <input type="text" placeholder="New User Address" className="p-2 border rounded mr-2" value={newUser} onChange={(e) => setNewUser(e.target.value)} />
+                <button onClick={handleAddUser} className="bg-green-600 text-white px-4 py-2 rounded-lg">Add User</button>
+                <input type="text" placeholder="New Owner Address" className="p-2 border rounded mr-2 mt-4" value={owner} onChange={(e) => setOwner(e.target.value)} />
+                <button onClick={handleChangeOwner} className="bg-red-600 text-white px-4 py-2 rounded-lg">Change Owner</button>
               </div>
             </div>
           </div>
