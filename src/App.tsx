@@ -1,30 +1,58 @@
-import { useEffect, useState } from "react";
-import { Vote, Trophy, Users } from "lucide-react";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { connectWallet, getCandidates, vote, getWinner, addUser, changeOwner } from "./dist/blockchain.js";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import React, { useEffect, useState } from "react";
+import { Vote, Trophy, Users, BarChart3, UserPlus, Trash, Edit } from "lucide-react";
+import {
+  connectWallet,
+  getCandidates,
+  vote,
+  getWinner,
+  addUser,
+  deleteUser,
+  addCandidate,
+  editCandidate,
+  deleteCandidate,
+  changeOwner,
+} from "../build/blockchain";
 
 function App() {
   const [candidates, setCandidates] = useState<
     { name: string; voteCount: number; index: number }[]
   >([]);
+  const [users, setUsers] = useState<{ address: string; name: string }[]>([]);
   const [hasVoted, setHasVoted] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState<number | null>(null);
   const [totalVotes, setTotalVotes] = useState(0);
   const [winner, setWinner] = useState<{ name: string; votes: number } | null>(null);
   const [newUser, setNewUser] = useState("");
+  const [userName, setUserName] = useState("");
   const [owner, setOwner] = useState("");
+  const [newCandidate, setNewCandidate] = useState("");
+  const [editName, setEditName] = useState("");
+  const [editIndex, setEditIndex] = useState<number | null>(null);
 
   useEffect(() => {
     fetchCandidates();
+    loadLocalData();
   }, []);
+  
+  function saveLocalData() {
+    localStorage.setItem("candidates", JSON.stringify(candidates));
+    localStorage.setItem("users", JSON.stringify(users));
+  }
+
+  function loadLocalData() {
+    const savedCandidates = localStorage.getItem("candidates");
+    const savedUsers = localStorage.getItem("users");
+    if (savedCandidates) setCandidates(JSON.parse(savedCandidates));
+    if (savedUsers) setUsers(JSON.parse(savedUsers));
+  }
 
   async function fetchCandidates() {
     const data = await getCandidates();
     if (data) {
       setCandidates(data);
-      setTotalVotes(
-        data.reduce((sum: number, candidate: { voteCount: number }) => sum + candidate.voteCount, 0)
-      );      
+      setTotalVotes(data.reduce((sum: number, candidate: { voteCount: number }) => sum + candidate.voteCount, 0));
+      saveLocalData();
     }
   }
 
@@ -40,10 +68,45 @@ function App() {
   }
 
   async function handleAddUser() {
-    if (newUser) {
-      await addUser(newUser);
+    if (newUser && userName) {
+      await addUser(newUser, userName);
+      setUsers([...users, { address: newUser, name: userName }]);
       setNewUser("");
+      setUserName("");
+      saveLocalData();
     }
+  }
+
+
+  async function handleDeleteUser(address: string) {
+    await deleteUser(address);
+    setUsers(users.filter(user => user.address !== address));
+    saveLocalData();
+  }
+
+  async function handleAddCandidate() {
+    if (newCandidate) {
+      await addCandidate(newCandidate);
+      setNewCandidate("");
+      fetchCandidates();
+      saveLocalData();
+    }
+  }
+
+  async function handleEditCandidate() {
+    if (editIndex !== null && editName) {
+      await editCandidate(editIndex, editName);
+      setEditIndex(null);
+      setEditName("");
+      fetchCandidates();
+      saveLocalData();
+    }
+  }
+
+  async function handleDeleteCandidate(index: number) {
+    await deleteCandidate(index);
+    fetchCandidates();
+    saveLocalData();
   }
 
   async function handleChangeOwner() {
@@ -54,59 +117,54 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <div className="flex items-center justify-center mb-4">
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">Voting System</h1>
-              <Vote className="h-12 w-12 text-purple-600" />
+    <div className="min-h-screen bg-gray-100 py-8">
+      <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-xl">
+        <h1 className="text-3xl font-bold text-center mb-4">Voting System</h1>
+        <button onClick={connectWallet} className="bg-purple-600 text-white px-4 py-2 rounded-lg mb-4 w-full">
+          Connect Wallet
+        </button>
+
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-3">Candidates</h2>
+          {candidates.map((candidate, index) => (
+            <div key={index} className="flex justify-between items-center p-2 border rounded-lg mb-2">
+              <span>{candidate.name} - {candidate.voteCount} votes</span>
+              <div>
+                <button onClick={() => handleDeleteCandidate(index)} className="text-red-500 px-2"><Trash size={16} /></button>
+              </div>
             </div>
-            <button onClick={connectWallet} className="bg-purple-600 text-white px-4 py-2 rounded-lg">
-              Connect Wallet
+          ))}
+          <input type="text" placeholder="New Candidate" className="p-2 border rounded mr-2" value={newCandidate} onChange={(e) => setNewCandidate(e.target.value)} />
+          <button onClick={handleAddCandidate} className="bg-green-600 text-white px-4 py-2 rounded-lg">Add</button>
+        </div>
+
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-3">Vote</h2>
+          {candidates.map((candidate, index) => (
+            <button key={index} onClick={() => handleVote(index)} className="block w-full text-left p-2 border rounded-lg mb-2">
+              {candidate.name}
             </button>
-          </div>
+          ))}
+        </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <div className="flex items-center gap-2 mb-6">
-                <Users className="h-6 w-6 text-blue-600" />
-                <h2 className="text-xl font-semibold">Cast Your Vote</h2>
-              </div>
-              <div className="space-y-4">
-                {candidates.map((candidate) => (
-                  <div
-                    key={candidate.index}
-                    className={`p-4 rounded-lg border-2 transition-all cursor-pointer
-                      ${selectedCandidate === candidate.index ? "border-purple-500 bg-purple-50" : "border-gray-200 hover:border-purple-200"}`}
-                    onClick={() => !hasVoted && setSelectedCandidate(candidate.index)}
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium">{candidate.name}</span>
-                      <span className="text-sm text-gray-500">
-                        {((candidate.voteCount / totalVotes) * 100).toFixed(1)}%
-                      </span>
-                    </div>
-                    <div className="mt-2 bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-purple-500 rounded-full h-2 transition-all"
-                        style={{ width: `${(candidate.voteCount / totalVotes) * 100}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-                <button
-                  onClick={() => selectedCandidate !== null && handleVote(selectedCandidate)}
-                  disabled={hasVoted || selectedCandidate === null}
-                  className={`w-full py-3 px-4 rounded-lg font-medium transition
-                    ${hasVoted || selectedCandidate === null ? "bg-gray-100 text-gray-500 cursor-not-allowed" : "bg-purple-600 text-white hover:bg-purple-700"}`}
-                >
-                  {hasVoted ? "Vote Recorded" : "Confirm Vote"}
-                </button>
-              </div>
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-3">Manage Users</h2>
+          {users.map((user, index) => (
+            <div key={index} className="flex justify-between items-center p-2 border rounded-lg mb-2">
+              <span>{user.name} ({user.address})</span>
+              <button onClick={() => handleDeleteUser(user.address)} className="text-red-500 px-2"><Trash size={16} /></button>
             </div>
-
-            <div className="space-y-6">
+          ))}
+          <input type="text" placeholder="User Address" className="p-2 border rounded mr-2" value={newUser} onChange={(e) => setNewUser(e.target.value)} />
+          <input type="text" placeholder="User Name" className="p-2 border rounded mr-2" value={userName} onChange={(e) => setUserName(e.target.value)} />
+          <button onClick={handleAddUser} className="bg-green-600 text-white px-4 py-2 rounded-lg mr-2">Add</button>
+        </div>
+        <div>
+          <h2 className="text-xl font-semibold mb-3">Transfer Ownership</h2>
+          <input type="text" placeholder="New Owner Address" className="p-2 border rounded mr-2" value={owner} onChange={(e) => setOwner(e.target.value)} />
+          <button onClick={handleChangeOwner} className="bg-red-600 text-white px-4 py-2 rounded-lg">Transfer</button>
+        </div>
+        <div className="space-y-12">
               <div className="bg-white rounded-xl shadow-lg p-6">
                 <div className="flex items-center gap-2 mb-6">
                   <Trophy className="h-6 w-6 text-yellow-500" />
@@ -125,18 +183,10 @@ function App() {
                   )}
                 </div>
               </div>
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">Admin Controls</h2>
-                <input type="text" placeholder="New User Address" className="p-2 border rounded mr-2" value={newUser} onChange={(e) => setNewUser(e.target.value)} />
-                <button onClick={handleAddUser} className="bg-green-600 text-white px-4 py-2 rounded-lg">Add User</button>
-                <input type="text" placeholder="New Owner Address" className="p-2 border rounded mr-2 mt-4" value={owner} onChange={(e) => setOwner(e.target.value)} />
-                <button onClick={handleChangeOwner} className="bg-red-600 text-white px-4 py-2 rounded-lg">Change Owner</button>
-              </div>
             </div>
-          </div>
-        </div>
       </div>
-    </div>  
+      
+    </div>
   );
 }
 
