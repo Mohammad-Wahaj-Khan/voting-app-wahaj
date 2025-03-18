@@ -21,6 +21,18 @@
     "jsx": "react-jsx"
   },
   "include": [
-    "src"
-, "dist", "blockchain.ts"  ]
+    "src",
+    "dist", 
+    "blockchain.ts"  ]
 }
+
+
+
+
+
+
+
+
+
+
+// npm list -global --depth=0
