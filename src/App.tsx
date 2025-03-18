@@ -12,7 +12,7 @@ import {
   editCandidate,
   deleteCandidate,
   changeOwner,
-} from "../blockchain.js";
+} from "../blockchain";
 
 function App() {
   const [candidates, setCandidates] = useState<
