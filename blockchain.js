@@ -452,7 +452,7 @@ var contractABI = [
         "type": "function"
     }
 ];
-function connectWallet() {
+export function connectWallet() {
     return __awaiter(this, void 0, void 0, function () {
         var provider, signer;
         return __generator(this, function (_a) {
@@ -471,14 +471,14 @@ function connectWallet() {
         });
     });
 }
-function getContract(signer) {
+export function getContract(signer) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             return [2 /*return*/, new ethers_1.ethers.Contract(contractAddress, contractABI, signer)];
         });
     });
 }
-function getCandidates() {
+export function getCandidates() {
     return __awaiter(this, void 0, void 0, function () {
         var signer, contract, candidates, error_1;
         return __generator(this, function (_a) {
@@ -510,7 +510,7 @@ function getCandidates() {
         });
     });
 }
-function vote(candidateIndex) {
+export function vote(candidateIndex) {
     return __awaiter(this, void 0, void 0, function () {
         var signer, contract, tx, error_2;
         return __generator(this, function (_a) {
@@ -542,7 +542,7 @@ function vote(candidateIndex) {
         });
     });
 }
-function getWinner() {
+export function getWinner() {
     return __awaiter(this, void 0, void 0, function () {
         var signer, contract, _a, winnerName, winnerVotes, error_3;
         return __generator(this, function (_b) {
@@ -570,7 +570,7 @@ function getWinner() {
         });
     });
 }
-function addUser(userAddress, name) {
+export function addUser(userAddress, name) {
     return __awaiter(this, void 0, void 0, function () {
         var signer, contract, tx, error_4;
         return __generator(this, function (_a) {
@@ -602,7 +602,7 @@ function addUser(userAddress, name) {
         });
     });
 }
-function deleteUser(userAddress) {
+export function deleteUser(userAddress) {
     return __awaiter(this, void 0, void 0, function () {
         var signer, contract, tx, error_5;
         return __generator(this, function (_a) {
@@ -634,7 +634,7 @@ function deleteUser(userAddress) {
         });
     });
 }
-function addCandidate(name) {
+export function addCandidate(name) {
     return __awaiter(this, void 0, void 0, function () {
         var signer, contract, tx, error_6;
         return __generator(this, function (_a) {
@@ -666,7 +666,7 @@ function addCandidate(name) {
         });
     });
 }
-function editCandidate(index, newName) {
+export function editCandidate(index, newName) {
     return __awaiter(this, void 0, void 0, function () {
         var signer, contract, tx, error_7;
         return __generator(this, function (_a) {
@@ -698,7 +698,7 @@ function editCandidate(index, newName) {
         });
     });
 }
-function deleteCandidate(index) {
+export function deleteCandidate(index) {
     return __awaiter(this, void 0, void 0, function () {
         var signer, contract, tx, error_8;
         return __generator(this, function (_a) {
@@ -730,7 +730,7 @@ function deleteCandidate(index) {
         });
     });
 }
-function changeOwner(newOwner) {
+export function changeOwner(newOwner) {
     return __awaiter(this, void 0, void 0, function () {
         var signer, contract, tx, error_9;
         return __generator(this, function (_a) {
