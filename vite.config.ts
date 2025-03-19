@@ -7,4 +7,7 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  build: {
+    outDir: "dist", // Vercel `dist` folder ko deploy karega
+  },
 });
