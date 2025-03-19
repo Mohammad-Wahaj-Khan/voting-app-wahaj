@@ -23,7 +23,7 @@
   "include": [
     "src",
     "dist", 
-    "blockchain.ts"  ]
+    "src/blockchain.ts"  ]
 }
 
 
