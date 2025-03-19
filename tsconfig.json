@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
+    "outDir": "dist",
     "lib": [
       "dom",
       "dom.iterable",
@@ -20,10 +21,11 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": [
-    "src",
-    "dist", 
-    "src/blockchain.ts"  ]
+"include": [
+  "src",
+  "src/blockchain.ts"
+],"exclude": ["node_modules", "dist"]
+
 }
 
 
