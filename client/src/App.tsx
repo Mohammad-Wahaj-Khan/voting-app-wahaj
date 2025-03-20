@@ -29,6 +29,7 @@ function App() {
   const [newCandidate, setNewCandidate] = useState("");
   const [editName, setEditName] = useState("");
   const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [walletConnected, setWalletConnected] = useState(false);
 
   useEffect(() => {
     fetchCandidates();
@@ -116,12 +117,22 @@ function App() {
     }
   }
 
+  async function handleConnectWallet() {
+    const signer = await connectWallet();
+    if (signer) {
+      setWalletConnected(true);
+    }
+  }
   return (
     <div className="min-h-screen bg-gray-100 py-8">
       <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-xl">
         <h1 className="text-3xl font-bold text-center mb-4">Voting System</h1>
-        <button onClick={connectWallet} className="bg-purple-600 text-white px-4 py-2 rounded-lg mb-4 w-full">
-          Connect Wallet
+        <button 
+          onClick={handleConnectWallet} 
+          disabled={walletConnected} 
+          className={`bg-purple-600 text-white px-4 py-2 rounded-lg mb-4 w-full ${walletConnected ? "opacity-50 cursor-not-allowed" : ""}`}
+        >
+          {walletConnected ? "Wallet Connected" : "Connect Wallet"}
         </button>
 
         <div className="mb-6">

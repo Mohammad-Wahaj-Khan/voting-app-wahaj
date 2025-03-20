@@ -414,15 +414,56 @@ declare global {
 }
 
 export async function connectWallet() {
-  if (!window.ethereum) {
-    alert("Please install MetaMask!");
-    return null;
+    if (!window.ethereum) {
+      alert("Please install MetaMask!");
+      return null;
+    }
+  
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    
+    try {
+      // Force wallet to switch to Sepolia (chainId: 11155111)
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: "0xAA36A7" }], // 0xAA36A7 = 11155111 in hex
+      });
+  
+      const signer = await provider.getSigner();
+      return signer;
+  
+    } catch (error: any) {
+      // If Sepolia is not added in MetaMask, prompt user to add it
+      if (error.code === 4902) {
+        try {
+          await window.ethereum.request({
+            method: "wallet_addEthereumChain",
+            params: [{
+              chainId: "0xAA36A7",
+              chainName: "Sepolia Testnet",
+              rpcUrls: ["https://sepolia.infura.io/v3/c01accb1ca9845a88201a5728ee0a91b"], // Replace with your RPC URL
+              nativeCurrency: {
+                name: "SepoliaETH",
+                symbol: "ETH",
+                decimals: 18,
+              },
+              blockExplorerUrls: ["https://sepolia.etherscan.io/"],
+            }],
+          });
+  
+          const signer = await provider.getSigner();
+          return signer;
+  
+        } catch (addError) {
+          console.error("Failed to add Sepolia network:", addError);
+          return null;
+        }
+      } else {
+        console.error("Failed to switch network:", error);
+        return null;
+      }
+    }
   }
-
-  const provider = new ethers.BrowserProvider(window.ethereum);
-  const signer = await provider.getSigner();
-  return signer;
-}
+  
 
 export async function getContract(signer: ethers.JsonRpcSigner) {
   return new ethers.Contract(contractAddress, contractABI, signer);

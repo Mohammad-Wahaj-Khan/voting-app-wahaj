@@ -10,4 +10,12 @@ export default defineConfig({
   build: {
     outDir: "dist", // Vercel `dist` folder ko deploy karega
   },
+  server: {
+    strictPort: true, // Ensure port consistency
+  },
+  resolve: {
+    alias: {
+      '@': '/src', // Allows cleaner imports
+    },
+  },
 });
