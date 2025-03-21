@@ -12,6 +12,7 @@ import {
   editCandidate,
   deleteCandidate,
   changeOwner,
+  getContract,
 } from "./blockchain";
 
 function App() {
@@ -30,12 +31,29 @@ function App() {
   const [editName, setEditName] = useState("");
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [walletConnected, setWalletConnected] = useState(false);
+  const [currentUser, setCurrentUser] = useState<string | null>(null);
+
 
   useEffect(() => {
     fetchCandidates();
     loadLocalData();
   }, []);
-  
+  useEffect(() => {
+    async function fetchData() {
+      const signer = await connectWallet();
+      if (!signer) return;
+
+      const contract = await getContract(signer);
+      const ownerAddress = await contract.owner();
+      setOwner(ownerAddress);
+      
+      const userAddress = await signer.getAddress();
+      setCurrentUser(userAddress);
+      saveLocalData()
+    }
+
+    fetchData();
+  }, []);
   function saveLocalData() {
     localStorage.setItem("candidates", JSON.stringify(candidates));
     localStorage.setItem("users", JSON.stringify(users));
@@ -161,18 +179,24 @@ function App() {
         <div className="mb-6">
           <h2 className="text-xl font-semibold mb-3">Manage Users</h2>
           {users.map((user, index) => (
-            <div key={index} className="flex justify-between items-center p-2 border rounded-lg mb-2">
-              <span>{user.name} ({user.address})</span>
-              <button onClick={() => handleDeleteUser(user.address)} className="text-red-500 px-2"><Trash size={16} /></button>
-            </div>
-          ))}
+        <div key={index} className="flex justify-between items-center p-2 border rounded-lg mb-2">
+          <span>{user.name} ({user.address})</span>
+            
+            {currentUser === owner && (
+              <button onClick={() => handleDeleteUser(user.address)} className="text-red-500 px-2">
+                <Trash size={16} />
+              </button>
+            )}
+          </div>
+        ))}
+
           <input type="text" placeholder="User Address" className="p-2 border rounded mr-2" value={newUser} onChange={(e) => setNewUser(e.target.value)} />
           <input type="text" placeholder="User Name" className="p-2 border rounded mr-2" value={userName} onChange={(e) => setUserName(e.target.value)} />
           <button onClick={handleAddUser} className="bg-green-600 text-white px-4 py-2 rounded-lg mr-2">Add</button>
         </div>
         <div>
           <h2 className="text-xl font-semibold mb-3">Transfer Ownership</h2>
-          <input type="text" placeholder="New Owner Address" className="p-2 border rounded mr-2" value={owner} onChange={(e) => setOwner(e.target.value)} />
+          <input type="text" placeholder="New Owner Address" className="p-2 border rounded mr-2" onChange={(e) => setOwner(e.target.value)} />
           <button onClick={handleChangeOwner} className="bg-red-600 text-white px-4 py-2 rounded-lg">Transfer</button>
         </div>
         <div className="space-y-12">

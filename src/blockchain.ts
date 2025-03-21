@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ethers } from "ethers";
 
-const contractAddress = "0xf7399984752fc91800CDde89A019f01b5C9F4801";
+const contractAddress = "0xF74Bca9E3632b8EaC7E5d0182850B3186BcAaa9f";
 
 const contractABI =[
     {
