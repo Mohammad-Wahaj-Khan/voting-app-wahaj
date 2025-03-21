@@ -196,7 +196,7 @@ function App() {
         </div>
         <div>
           <h2 className="text-xl font-semibold mb-3">Transfer Ownership</h2>
-          <input type="text" placeholder="New Owner Address" className="p-2 border rounded mr-2" value={owner} onChange={(e) => setOwner(e.target.value)} />
+          <input type="text" placeholder="New Owner Address" className="p-2 border rounded mr-2" onChange={(e) => setOwner(e.target.value)} />
           <button onClick={handleChangeOwner} className="bg-red-600 text-white px-4 py-2 rounded-lg">Transfer</button>
         </div>
         <div className="space-y-12">
